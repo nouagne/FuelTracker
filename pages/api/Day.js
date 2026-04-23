@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv'
+import { Redis } from '@upstash/redis'
+
+const redis = Redis.fromEnv()
 
 export default async function handler(req, res) {
   const { date } = req.query
@@ -11,7 +13,7 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      const data = await kv.get(key)
+      const data = await redis.get(key)
       return res.status(200).json(data || null)
     } catch (e) {
       return res.status(500).json({ error: 'Failed to load' })
@@ -20,19 +22,10 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      await kv.set(key, req.body)
+      await redis.set(key, req.body)
       return res.status(200).json({ ok: true })
     } catch (e) {
       return res.status(500).json({ error: 'Failed to save' })
-    }
-  }
-
-  if (req.method === 'GET' && req.query.all === 'true') {
-    try {
-      const keys = await kv.keys('day:*')
-      return res.status(200).json(keys)
-    } catch (e) {
-      return res.status(500).json({ error: 'Failed to list' })
     }
   }
 
