@@ -121,7 +121,7 @@ function dayTotals(day) {
 }
 
 async function callAI(prompt) {
-  const r = await fetch("https://api.anthropic.com/v1/messages", {
+  const r = await fetch("/api/ai", {
     method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600, messages:[{role:"user",content:prompt}] })
   });
@@ -309,7 +309,7 @@ function PhotoSheet({ profile, activeMeal, setActiveMeal, onAdd, onClose }) {
     setLoading(true); setErr(""); setRes(null);
     try {
       const b64 = await new Promise((ok,ko)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=ko;r.readAsDataURL(file);});
-      const resp = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},{type:"text",text:`Analyse ce repas. JSON sans backticks:\n{"name":"nom","cal":000,"protein":00,"carbs":00,"fat":00,"description":"court","confidence":"high|medium|low"}`}]}]})});
+      const resp = await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:600,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},{type:"text",text:`Analyse ce repas. JSON sans backticks:\n{"name":"nom","cal":000,"protein":00,"carbs":00,"fat":00,"description":"court","confidence":"high|medium|low"}`}]}]})});
       const data = await resp.json();
       const text = data.content?.map(i=>i.text||"").join("")||"";
       setRes(JSON.parse(text.replace(/```json|```/g,"").trim()));
